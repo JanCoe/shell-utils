@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Get the currently running kernel version
+current_kernel=$(uname -r)
+
+# Just retain the latest kernel.
+old_kernels=($(dnf repoquery --installonly --latest-limit=-1 -q))
+
+# Filter out the currently running kernel from the list
+safe_to_remove=()
+for pkg in "${old_kernels[@]}"; do
+    if [[ "$pkg" == *"$current_kernel"* ]]; then
+        printf "Skipping currently running kernel: %s\n" "$pkg"
+        continue
+    fi
+    safe_to_remove+=("$pkg")
+done
+
+if [[ "${#safe_to_remove[@]}" -eq 0 ]]; then
+    printf "%s\n" "No old kernels found that are safe to remove"
+    exit 0
+fi
+
+if ! dnf remove "${safe_to_remove[@]}"; then
+    printf "%s\n" "Failed to remove old kernels"
+    exit 1
+fi
+
+printf "%s\n" "Removed old kernels"
+exit 0

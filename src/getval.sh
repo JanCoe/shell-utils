@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
-HEADER=1
-awk -F, -v key_col="${1}" -v key_val="${2}" -v out_col="${3}" -v header="${HEADER}" '
+header=1
+key_col="${1}"
+key_val="${2}"
+out_col="${3}"
+in_file="${4}"
+awk -F, -v key_col="$key_col" -v key_val="$key_val" -v out_col="$out_col" -v header="$header" '
     NR == header {
         for (i=1; i<=NF; i++) {
             if ($i == key_col) key_idx = i
@@ -12,7 +16,7 @@ awk -F, -v key_col="${1}" -v key_val="${2}" -v out_col="${3}" -v header="${HEADE
         if (key_idx && out_idx && $(key_idx) == key_val)
             print $(out_idx)
     }
-    ' "${4}"
+    ' "$in_file"
 # -----------------------------------------------------------------------------
 # getval.sh - Extract a value from a CSV file based on a key match
 #

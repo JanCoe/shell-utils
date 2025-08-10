@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+read -r -p "Enter the connection name: " con
+echo
+
+echo "Setting Google dnf..."
+nmcli connection modify "$con" ipv4.dns "8.8.8.8 8.8.4.4"
+nmcli connection modify "$con" ipv4.ignore-auto-dns yes
+nmcli connection modify "$con" ipv6.dns "2001:4860:4860::8888 2001:4860:4860::8844"
+nmcli connection modify "$con" ipv6.ignore-auto-dns yes
+echo "Restarting the connection..."
+nmcli connection down "$con"
+nmcli connection up "$con"
+
+echo "Changed settings..."
+resolvectl status

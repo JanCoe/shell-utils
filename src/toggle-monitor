@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+INTERNAL="eDP-1"
+EXTERNAL="HDMI-A-2"
+STATE_FILE="/tmp/hypr_display_state"
+
+# Fallback: Start at state 0 if no file exists
+if [[ ! -f "$STATE_FILE" ]]; then
+    echo "0" > "$STATE_FILE"
+fi
+
+# Read current state (0 = internal only, 1 = both, 2 = external only)
+STATE=$(cat "$STATE_FILE")
+
+# Toggle to next state
+case "$STATE" in
+    0)
+        # State 1: both internal and external ON
+        hyprctl keyword monitor "$INTERNAL,preferred,auto,1"
+        hyprctl keyword monitor "$EXTERNAL,preferred,auto,1"
+        echo "1" > "$STATE_FILE"
+        ;;
+    1)
+        # State 2: external only
+        hyprctl keyword monitor "$INTERNAL,disable"
+        hyprctl keyword monitor "$EXTERNAL,preferred,auto,1"
+        echo "2" > "$STATE_FILE"
+        ;;
+    2)
+        # State 0: internal only
+        hyprctl keyword monitor "$INTERNAL,preferred,auto,1"
+        hyprctl keyword monitor "$EXTERNAL,disable"
+        echo "0" > "$STATE_FILE"
+        ;;
+    *)
+        # Unknown state, reset
+        hyprctl keyword monitor "$INTERNAL,preferred,auto,1"
+        hyprctl keyword monitor "$EXTERNAL,disable"
+        echo "0" > "$STATE_FILE"
+        ;;
+esac
