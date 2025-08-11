@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-feh --bg-scale ~/.dotfiles/backgrounds/touhou_anime.jpg
